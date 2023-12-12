@@ -1,0 +1,32 @@
+#!/bin/bash
+
+#1. Determine the number of parameters
+if [ $# -lt 1 ]
+then
+    echo Not Enough Arguement!
+    exit;
+fi
+
+#2. Iterate through all machines in the cluster
+for host in hadoop102 hadoop103 hadoop104
+do
+    echo ====================  $host  ====================
+    #3. Traverse all directories and send them one by one
+
+    for file in $@
+    do
+        #4. Determine if the file exists
+        if [ -e $file ]
+            then
+                #5. Get the parent directory
+                pdir=$(cd -P $(dirname $file); pwd)
+
+                #6. Get the name of the current file
+                fname=$(basename $file)
+                ssh $host "mkdir -p $pdir"
+                rsync -av $pdir/$fname $host:$pdir
+            else
+                echo $file does not exists!
+        fi
+    done
+done
